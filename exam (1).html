@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اختبار مصطلحات الذكاء الاصطناعي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#0f1029;
+    --bg-2:#1e1b4b;
+    --bg-3:#3b1e6b;
+    --accent:#7c5cff;
+    --accent-2:#22d3ee;
+    --ok:#22c55e;
+    --bad:#ef4444;
+    --glass:rgba(255,255,255,0.08);
+    --glass-border:rgba(255,255,255,0.18);
+    --text:#f4f2ff;
+    --text-dim:#c8c3e8;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Cairo','Tajawal',sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at 15% 20%, rgba(124,92,255,0.35), transparent 45%),
+      radial-gradient(circle at 85% 15%, rgba(34,211,238,0.25), transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(124,92,255,0.25), transparent 55%),
+      linear-gradient(135deg,var(--bg-1),var(--bg-2) 55%,var(--bg-3));
+    background-attachment:fixed;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .app{width:100%;max-width:760px;}
+  .card{
+    background:var(--glass);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+    border-radius:26px;
+    padding:36px 32px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+    animation:rise .5s ease;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  /* ---------- welcome ---------- */
+  .brand{text-align:center;margin-bottom:22px;}
+  .brand .logo{
+    width:64px;height:64px;border-radius:18px;margin:0 auto 14px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex;align-items:center;justify-content:center;font-size:28px;
+    box-shadow:0 10px 30px rgba(124,92,255,0.5);
+  }
+  .brand h1{font-size:26px;font-weight:800;margin:0 0 6px;}
+  .brand p{color:var(--text-dim);margin:0;font-size:14.5px;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:14px;margin-bottom:8px;color:var(--text-dim);font-weight:600;}
+  .field input{
+    width:100%;padding:14px 16px;border-radius:14px;border:1px solid var(--glass-border);
+    background:rgba(255,255,255,0.06);color:var(--text);font-family:inherit;font-size:15px;
+    outline:none;transition:.25s;
+  }
+  .field input:focus{border-color:var(--accent-2);box-shadow:0 0 0 4px rgba(34,211,238,0.15);}
+  .field input::placeholder{color:rgba(244,242,255,0.35);}
+
+  .btn{
+    width:100%;padding:15px 20px;border:none;border-radius:14px;font-family:inherit;
+    font-size:16px;font-weight:700;cursor:pointer;transition:.25s;display:flex;align-items:center;justify-content:center;gap:8px;
+  }
+  .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 10px 26px rgba(124,92,255,0.4);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(124,92,255,0.55);}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+  .btn-ghost{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid var(--glass-border);}
+  .btn-ghost:hover{background:rgba(255,255,255,0.14);}
+  .error-msg{color:#fca5a5;font-size:13.5px;margin-top:10px;text-align:center;min-height:18px;}
+
+  /* ---------- exam ---------- */
+  .exam-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .q-count{font-weight:700;color:var(--text-dim);font-size:14px;}
+  .timer{font-weight:700;color:var(--accent-2);font-size:14px;background:rgba(34,211,238,0.12);padding:6px 14px;border-radius:999px;}
+  .progress-wrap{height:9px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;margin-bottom:26px;}
+  .progress-bar{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .4s ease;}
+
+  .q-title{font-size:19px;font-weight:700;line-height:1.7;margin-bottom:22px;}
+  .options{display:flex;flex-direction:column;gap:12px;margin-bottom:26px;}
+  .option{
+    padding:15px 18px;border-radius:14px;border:1px solid var(--glass-border);
+    background:rgba(255,255,255,0.05);cursor:pointer;transition:.2s;font-size:15px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .option:hover{background:rgba(255,255,255,0.1);}
+  .option .dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--text-dim);flex-shrink:0;position:relative;transition:.2s;}
+  .option.selected{border-color:var(--accent-2);background:rgba(34,211,238,0.14);}
+  .option.selected .dot{border-color:var(--accent-2);}
+  .option.selected .dot::after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--accent-2);}
+
+  .nav-row{display:flex;gap:12px;}
+  .nav-row .btn{width:auto;flex:1;}
+
+  /* ---------- results ---------- */
+  .result-badge{text-align:center;margin-bottom:8px;}
+  .result-badge .icon{font-size:56px;margin-bottom:6px;}
+  .result-title{text-align:center;font-size:24px;font-weight:800;margin-bottom:4px;}
+  .result-sub{text-align:center;color:var(--text-dim);font-size:15px;margin-bottom:24px;}
+  .pass{color:var(--ok);}
+  .fail{color:var(--bad);}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px;}
+  .stat{background:rgba(255,255,255,0.06);border:1px solid var(--glass-border);border-radius:16px;padding:16px;text-align:center;}
+  .stat .val{font-size:22px;font-weight:800;}
+  .stat .lbl{font-size:12.5px;color:var(--text-dim);margin-top:4px;}
+  .info-list{background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);border-radius:16px;padding:16px 18px;margin-bottom:22px;font-size:14.5px;}
+  .info-list div{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.1);}
+  .info-list div:last-child{border-bottom:none;}
+  .info-list span:first-child{color:var(--text-dim);}
+  .whatsapp-btn{background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;}
+  .whatsapp-btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(37,211,102,0.45);}
+
+  @media (max-width:480px){
+    .card{padding:26px 18px;border-radius:20px;}
+    .brand h1{font-size:22px;}
+    .stat-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= PAGE 1: Welcome / Candidate Info ================= -->
+  <div class="card screen active" id="screen-welcome">
+    <div class="brand">
+      <div class="logo">🧠</div>
+      <h1>اختبار مصطلحات الذكاء الاصطناعي</h1>
+      <p>ورشة التسويق الرقمي — Enppi Training &amp; Development</p>
+    </div>
+
+    <div class="field">
+      <label for="inp-name">اسم الممتحن</label>
+      <input type="text" id="inp-name" placeholder="اكتب اسمك بالكامل">
+    </div>
+    <div class="field">
+      <label for="inp-job">الوظيفة</label>
+      <input type="text" id="inp-job" placeholder="مثال: مهندس إنتاج">
+    </div>
+    <div class="field">
+      <label for="inp-dept">القسم</label>
+      <input type="text" id="inp-dept" placeholder="مثال: الإنتاج">
+    </div>
+
+    <button class="btn btn-primary" id="btn-start" onclick="startExam()">بدء الاختبار →</button>
+    <div class="error-msg" id="welcome-error"></div>
+  </div>
+
+  <!-- ================= PAGE 2: Exam ================= -->
+  <div class="card screen" id="screen-exam">
+    <div class="exam-top">
+      <span class="q-count" id="q-count">السؤال 1 من 5</span>
+      <span class="timer" id="timer">⏱ 00:00</span>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="progress-bar" style="width:20%"></div></div>
+
+    <div class="q-title" id="q-title"></div>
+    <div class="options" id="q-options"></div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="btn-prev" onclick="prevQuestion()">السابق</button>
+      <button class="btn btn-primary" id="btn-next" onclick="nextQuestion()">التالي</button>
+    </div>
+  </div>
+
+  <!-- ================= FINAL PAGE: Results ================= -->
+  <div class="card screen" id="screen-result">
+    <div class="result-badge">
+      <div class="icon" id="result-icon">🏆</div>
+      <div class="result-title" id="result-title"></div>
+      <div class="result-sub" id="result-sub"></div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat"><div class="val" id="stat-correct">0</div><div class="lbl">إجابات صحيحة</div></div>
+      <div class="stat"><div class="val" id="stat-wrong">0</div><div class="lbl">إجابات خاطئة</div></div>
+      <div class="stat"><div class="val" id="stat-percent">0%</div><div class="lbl">النسبة المئوية</div></div>
+      <div class="stat"><div class="val" id="stat-status">-</div><div class="lbl">الحالة</div></div>
+    </div>
+
+    <div class="info-list">
+      <div><span>اسم الممتحن</span><span id="res-name"></span></div>
+      <div><span>الوظيفة</span><span id="res-job"></span></div>
+      <div><span>القسم</span><span id="res-dept"></span></div>
+    </div>
+
+    <button class="btn whatsapp-btn" onclick="sendWhatsApp()">📲 إرسال النتيجة عبر واتساب</button>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   CONFIG — عدّل رقم الواتساب هنا فقط
+   ============================================================ */
+const whatsappNumber = "201234567890"; // بصيغة دولية بدون + أو 00
+
+/* ============================================================
+   QUESTION BANK — مستخرج حصراً من محتوى سلايدات AI Terms
+   ============================================================ */
+const QUESTIONS = [
+  {
+    level: "Recall",
+    question: "أي نظام يوصف بأنه تم تدريبه على كميات ضخمة من النصوص بحيث يقدر يفهم اللغة، يولّد نصوص، يجاوب على الأسئلة، ويلخّص ويترجم؟",
+    options: [
+      { text: "LLM (نموذج لغوي كبير)", correct: true },
+      { text: "API (واجهة برمجة التطبيقات)", correct: false },
+      { text: "REPO (مستودع الكود)", correct: false },
+      { text: "AGI (الذكاء الاصطناعي العام)", correct: false }
+    ]
+  },
+  {
+    level: "Understanding",
+    question: "ما الفرق الجوهري بين نموذج ذكاء اصطناعي عادي وبين تقنية RAG؟",
+    options: [
+      { text: "RAG يبحث عن معلومات ومستندات ذات صلة أولاً ثم يبني إجابته عليها، فتكون أدق", correct: true },
+      { text: "RAG يعتمد فقط على البيانات اللي اتدرب عليها النموذج من الأساس", correct: false },
+      { text: "RAG يستخدم لتخزين الأكواد بدل النصوص", correct: false },
+      { text: "RAG وسيلة لربط برنامجين مع بعض بدون الحاجة لأي بيانات", correct: false }
+    ]
+  },
+  {
+    level: "Understanding",
+    question: "ما الوظيفة الأساسية لبروتوكول MCP؟",
+    options: [
+      { text: "يسمح لمساعدات الذكاء الاصطناعي بالاتصال بأدوات ومصادر بيانات خارجية بطريقة موحدة", correct: true },
+      { text: "يخزّن كل نسخ الكود وتاريخ تعديلات المشروع", correct: false },
+      { text: "يولّد نصوص طويلة بناء على تدريب النموذج فقط", correct: false },
+      { text: "يحدد شخصية الذكاء الاصطناعي أثناء المحادثة", correct: false }
+    ]
+  },
+  {
+    level: "Application",
+    question: "شركة عايزة تبني نظام ذكاء اصطناعي يقدر لوحده يبحث عن معلومة، يكتب تقرير عنها، ثم يرسله بالإيميل، كل ده من غير ما حد يوجّهه في كل خطوة. أنسب مصطلح يوصف هذا النظام هو؟",
+    options: [
+      { text: "Agentic AI", correct: true },
+      { text: "API", correct: false },
+      { text: "REPO", correct: false },
+      { text: "AGI", correct: false }
+    ]
+  },
+  {
+    level: "Understanding",
+    question: "داخل كلود، إيه اللي بتمثله الـ Skills بالظبط مقارنة بالـ Connectors والـ Plugins؟",
+    options: [
+      { text: "تعليمات وطرق عمل مخصصة تحدد سلوك كلود وطريقة تفكيره في مهمة معينة", correct: true },
+      { text: "روابط جاهزة تصل كلود بخدمات خارجية زي Google Drive أو Slack", correct: false },
+      { text: "إضافات تمنح كلود قدرات جديدة زي تنفيذ الأكواد أو رسم الرسوم البيانية", correct: false },
+      { text: "بروتوكول موحّد لربط كلود بأي أداة خارجية", correct: false }
+    ]
+  }
+];
+
+const PASS_SCORE = 80;
+
+let candidate = {};
+let shuffledQuestions = [];
+let currentIndex = 0;
+let answers = []; // stores selected option index per question
+let timerInterval = null;
+let seconds = 0;
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function prepareQuestions(){
+  shuffledQuestions = QUESTIONS.map(q=>{
+    const opts = shuffle(q.options);
+    return { question:q.question, options:opts };
+  });
+  answers = new Array(shuffledQuestions.length).fill(null);
+}
+
+function startExam(){
+  const name = document.getElementById('inp-name').value.trim();
+  const job = document.getElementById('inp-job').value.trim();
+  const dept = document.getElementById('inp-dept').value.trim();
+  const err = document.getElementById('welcome-error');
+
+  if(!name || !job || !dept){
+    err.textContent = "من فضلك أكمل جميع الحقول قبل بدء الاختبار.";
+    return;
+  }
+  err.textContent = "";
+  candidate = { name, job, dept };
+
+  prepareQuestions();
+  currentIndex = 0;
+  seconds = 0;
+
+  switchScreen('screen-exam');
+  startTimer();
+  renderQuestion();
+}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
+    seconds++;
+    const m = String(Math.floor(seconds/60)).padStart(2,'0');
+    const s = String(seconds%60).padStart(2,'0');
+    document.getElementById('timer').textContent = `⏱ ${m}:${s}`;
+  },1000);
+}
+
+function renderQuestion(){
+  const total = shuffledQuestions.length;
+  const q = shuffledQuestions[currentIndex];
+
+  document.getElementById('q-count').textContent = `السؤال ${currentIndex+1} من ${total}`;
+  document.getElementById('progress-bar').style.width = `${((currentIndex+1)/total)*100}%`;
+  document.getElementById('q-title').textContent = q.question;
+
+  const optWrap = document.getElementById('q-options');
+  optWrap.innerHTML = "";
+  q.options.forEach((opt, idx)=>{
+    const div = document.createElement('div');
+    div.className = 'option' + (answers[currentIndex]===idx ? ' selected' : '');
+    div.innerHTML = `<span class="dot"></span><span>${opt.text}</span>`;
+    div.onclick = ()=> selectOption(idx);
+    optWrap.appendChild(div);
+  });
+
+  document.getElementById('btn-prev').style.visibility = currentIndex===0 ? 'hidden' : 'visible';
+  document.getElementById('btn-next').textContent = currentIndex===total-1 ? 'إنهاء الاختبار ✓' : 'التالي';
+  updateNextState();
+}
+
+function selectOption(idx){
+  answers[currentIndex] = idx;
+  renderQuestion();
+}
+
+function updateNextState(){
+  const btn = document.getElementById('btn-next');
+  btn.disabled = answers[currentIndex] === null;
+}
+
+function prevQuestion(){
+  if(currentIndex>0){
+    currentIndex--;
+    renderQuestion();
+  }
+}
+
+function nextQuestion(){
+  if(answers[currentIndex]===null) return; // prevent skipping
+  if(currentIndex < shuffledQuestions.length-1){
+    currentIndex++;
+    renderQuestion();
+  } else {
+    finishExam();
+  }
+}
+
+function finishExam(){
+  clearInterval(timerInterval);
+
+  let correct = 0;
+  shuffledQuestions.forEach((q, i)=>{
+    const chosen = answers[i];
+    if(chosen!==null && q.options[chosen].correct) correct++;
+  });
+  const total = shuffledQuestions.length;
+  const wrong = total - correct;
+  const percent = Math.round((correct/total)*100);
+  const passed = percent >= PASS_SCORE;
+
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent = wrong;
+  document.getElementById('stat-percent').textContent = percent + '%';
+  document.getElementById('stat-status').textContent = passed ? 'PASS' : 'FAIL';
+  document.getElementById('stat-status').style.color = passed ? 'var(--ok)' : 'var(--bad)';
+
+  document.getElementById('res-name').textContent = candidate.name;
+  document.getElementById('res-job').textContent = candidate.job;
+  document.getElementById('res-dept').textContent = candidate.dept;
+
+  let message, icon;
+  if(percent===100){ message="ممتاز 🌟"; icon="🏆"; }
+  else if(percent>=90){ message="جيد جداً 👏"; icon="🥇"; }
+  else if(percent>=80){ message="جيد 👍"; icon="✅"; }
+  else { message="يحتاج إلى إعادة التدريب"; icon="🔁"; }
+
+  document.getElementById('result-icon').textContent = icon;
+  document.getElementById('result-title').innerHTML = passed
+    ? `<span class="pass">${message}</span>`
+    : `<span class="fail">${message}</span>`;
+  document.getElementById('result-sub').textContent = passed
+    ? `اجتزت الاختبار بنجاح — ${correct} من ${total} إجابات صحيحة`
+    : `للأسف لم تجتز الحد الأدنى للنجاح (${PASS_SCORE}%) — ${correct} من ${total} إجابات صحيحة`;
+
+  window._lastResult = { correct, wrong, total, percent, passed };
+
+  switchScreen('screen-result');
+}
+
+function sendWhatsApp(){
+  const r = window._lastResult;
+  if(!r) return;
+  const text =
+`اسم الممتحن:
+${candidate.name}
+
+الوظيفة:
+${candidate.job}
+
+القسم:
+${candidate.dept}
+
+النتيجة:
+${r.correct} من ${r.total}
+
+النسبة:
+${r.percent}%
+
+الحالة:
+${r.passed ? 'PASS' : 'FAIL'}`;
+
+  const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+function switchScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>
+</body>
+</html>
